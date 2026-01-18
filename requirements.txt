@@ -1,11 +1,4 @@
-
-Toutes les librairies Python utilisées :
 streamlit
 pandas
 psycopg2-binary
 Faker
-random
-datetime
-timedelta
-
-mombre
