@@ -11,14 +11,13 @@ st.title("Emploi du Temps des Examens Universitaires")
 # Récupère l'URL de la base depuis les variables d'environnement (Render)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-try:
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor()
-    st.success("Connexion à la base Render réussie !")
-except Exception as e:
-    st.error(f"Erreur de connexion à la base Render : {e}")
-    st.stop()  # Arrête l'exécution si la connexion échoue
 
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if not DATABASE_URL:
+    st.error("DATABASE_URL non trouvé")
+    st.stop()
+conn = psycopg2.connect(DATABASE_URL)
+cur = conn.cursor()
 # Chargement départements
 cur.execute("SELECT id, nom FROM departements ORDER BY nom")
 departements = cur.fetchall()
