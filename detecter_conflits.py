@@ -4,7 +4,7 @@ import streamlit as st
 import pandas as pd
 import time
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = "postgresql://edt_user:nve3Sp09ASDZ8PqZZu3LMTdAtKR6zyZz@dpg-d5n7q3chg0os739lu5e0-a.virginia-postgres.render.com:5432/edt_universitaire_1v9b"
 
 if not DATABASE_URL:
     st.error("DATABASE_URL non trouvé")

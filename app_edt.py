@@ -5,17 +5,17 @@ import psycopg2
 
 st.set_page_config(page_title="Gestion Examens", layout="wide")
 st.title("Emploi du Temps des Examens Universitaires")
+# URL de connexion Render
+DATABASE_URL = "postgresql://edt_user:nve3Sp09ASDZ8PqZZu3LMTdAtKR6zyZz@dpg-d5n7q3chg0os739lu5e0-a.virginia-postgres.render.com:5432/edt_universitaire_1v9b"
 
-# Connexion PostgreSQL Render
+# Connexion
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    st.success("Connexion à la base Render réussie !")
+except Exception as e:
+    st.error(f"Erreur de connexion : {e}")
 
-# Récupère l'URL de la base depuis les variables d'environnement (Render)
-DATABASE_URL = os.environ.get("DATABASE_URL")
 
-
-DATABASE_URL = os.environ.get("DATABASE_URL")
-if not DATABASE_URL:
-    st.error("DATABASE_URL non trouvé")
-    st.stop()
 conn = psycopg2.connect(DATABASE_URL)
 cur = conn.cursor()
 # Chargement départements
