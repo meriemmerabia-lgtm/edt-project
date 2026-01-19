@@ -1,19 +1,18 @@
-import os
 import psycopg2
+import streamlit as st
 import pandas as pd
-import time  # <-- Ajouté pour mesurer le temps
+import time
 
-# Connexion PostgreSQL
 conn = psycopg2.connect(
-    host="aws-1-eu-central-2.pooler.supabase.com",
-    port=6543,
-    database="postgres",
-    user="postgres.ryzlenworqjmdgkanfcj",
-    ppassword=os.environ.get("DB_PASSWORD")
-
+    host=st.secrets["postgres"]["host"],
+    database=st.secrets["postgres"]["database"],
+    user=st.secrets["postgres"]["user"],
+    password=st.secrets["postgres"]["password"],
+    port=st.secrets["postgres"]["port"],
+    sslmode="require"
 )
 cursor = conn.cursor()
-# Requêtes de détection de conflits
+
 queries = {
     "Conflits étudiants": """
         SELECT i.etudiant_id, DATE(e.date_heure) AS jour, COUNT(*) 
@@ -22,14 +21,12 @@ queries = {
         GROUP BY i.etudiant_id, DATE(e.date_heure)
         HAVING COUNT(*) > 1;
     """,
-
     "Conflits professeurs": """
         SELECT prof_id, DATE(date_heure), COUNT(*)
         FROM examens
         GROUP BY prof_id, DATE(date_heure)
         HAVING COUNT(*) > 3;
     """,
-
     "Conflits salles capacité": """
         SELECT e.id, l.nom, l.capacite, COUNT(i.etudiant_id)
         FROM examens e
@@ -40,17 +37,14 @@ queries = {
     """
 }
 
-# Exécution et chronométrage
 for titre, query in queries.items():
-    start = time.time()  # Début chrono
+    start = time.time()
     df = pd.read_sql(query, conn)
-    end = time.time()    # Fin chrono
-    
-    print(f"\n {titre} (Temps d'exécution : {round(end - start, 2)} secondes)")
+    end = time.time()
+    print(f"\n{titre} (Temps d'exécution : {round(end - start, 2)} s)")
     if df.empty:
         print(" Aucun conflit")
     else:
         print(df)
 
-# Fermeture de la connexion
 conn.close()

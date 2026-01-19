@@ -2,22 +2,23 @@ import os
 from faker import Faker
 import psycopg2
 import random
+import streamlit as st
 from datetime import datetime, timedelta
 
 fake = Faker()
-fake.unique.clear()  # Réinitialise la mémoire unique
+fake.unique.clear()
 
-# Connexion PostgreSQL
 conn = psycopg2.connect(
-    host="aws-1-eu-central-2.pooler.supabase.com",
-    port=6543,
-    database="postgres",
-    user="postgres.ryzlenworqjmdgkanfcj",
-    password=os.environ.get("DB_PASSWORD")
-
+    host=st.secrets["postgres"]["host"],
+    database=st.secrets["postgres"]["database"],
+    user=st.secrets["postgres"]["user"],
+    password=st.secrets["postgres"]["password"],
+    port=st.secrets["postgres"]["port"],
+    sslmode="require"
 )
 cursor = conn.cursor()
-# 1️ Départements
+
+# 1. Départements
 departements = ["Informatique", "Maths", "Physique", "Chimie", "Biologie", "Economie", "Droit"]
 for dept in departements:
     cursor.execute("""
@@ -30,7 +31,8 @@ conn.commit()
 
 cursor.execute("SELECT id, nom FROM departements;")
 dept_ids = cursor.fetchall()
-# 2️ Formations (~30 par département)
+
+# 2. Formations
 formations_par_dept = 30
 for dept_id, dept_name in dept_ids:
     for i in range(1, formations_par_dept + 1):
@@ -44,12 +46,11 @@ for dept_id, dept_name in dept_ids:
 conn.commit()
 
 cursor.execute("SELECT id, nom, dept_id FROM formations;")
-formation_ids = cursor.fetchall()  
+formation_ids = cursor.fetchall()
 
-# 3️ Étudiants (~13000)
+# 3. Étudiants (~13000)
 nb_etudiants_total = 13000
 etudiants_par_formation = nb_etudiants_total // len(formation_ids)
-
 for f_id, f_name, f_dept in formation_ids:
     for _ in range(etudiants_par_formation):
         nom = fake.last_name()
@@ -63,9 +64,9 @@ for f_id, f_name, f_dept in formation_ids:
 conn.commit()
 
 cursor.execute("SELECT id, formation_id FROM etudiants;")
-etudiants = cursor.fetchall()  
+etudiants = cursor.fetchall()
 
-# 4️ Modules (6-9 par formation)
+# 4. Modules
 modules = []
 for f_id, f_name, f_dept in formation_ids:
     nb_modules = random.randint(6, 9)
@@ -78,10 +79,10 @@ for f_id, f_name, f_dept in formation_ids:
             RETURNING id
         """, (nom_module, credits, f_id))
         module_id = cursor.fetchone()[0]
-        modules.append((module_id, f_id))  # garder pour les inscriptions et examens
+        modules.append((module_id, f_id))
 conn.commit()
 
-# 5️ Professeurs (10-15 par département, noms uniques)
+# 5. Professeurs
 professeurs = []
 for dept_id, dept_name in dept_ids:
     for i in range(15):
@@ -96,7 +97,7 @@ for dept_id, dept_name in dept_ids:
         professeurs.append((prof_id, dept_id))
 conn.commit()
 
-# 6️ Salles (5 par département, noms uniques)
+# 6. Salles
 salles = []
 capacites_possibles = [20, 30, 50, 100]
 salles_par_dept = 5
@@ -115,10 +116,8 @@ for dept_id, dept_name in dept_ids:
         salles.append((salle_id, dept_id))
 conn.commit()
 
-
-# 7️ Examens (1 par module, prof et salle du même département)
+# 7. Examens
 for module_id, f_id in modules:
-    # Récupérer le département du module
     dept_id = next(f_dept for fid, f_name, f_dept in formation_ids if fid == f_id)
     prof_ids_dept = [pid for pid, p_dept in professeurs if p_dept == dept_id]
     salle_dept = [s_id for s_id, s_dept in salles if s_dept == dept_id]
@@ -134,7 +133,7 @@ for module_id, f_id in modules:
     """, (module_id, prof_id, salle_id, date_heure, duree))
 conn.commit()
 
-# 8️ Inscriptions (6 modules par étudiant)
+# 8. Inscriptions
 for etu_id, f_id in etudiants:
     modules_de_form = [m_id for m_id, mod_fid in modules if mod_fid == f_id]
     modules_sample = modules_de_form if len(modules_de_form) <= 6 else random.sample(modules_de_form, 6)
@@ -145,8 +144,7 @@ for etu_id, f_id in etudiants:
             VALUES (%s, %s, %s)
         """, (etu_id, mod_id, note))
 conn.commit()
-# Fermer connexion
+
 cursor.close()
 conn.close()
-
-print(" Base de données remplie avec succès !")
+print("Base de données remplie avec succès !")
