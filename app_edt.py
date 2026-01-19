@@ -35,7 +35,7 @@ cur = conn.cursor()
 cur.execute("SELECT id, nom FROM departements ORDER BY nom")
 departements = cur.fetchall()
 if not departements:
-    st.error("⚠️ Aucun département trouvé")
+    st.error(" Aucun département trouvé")
     st.stop()
 dept_dict = {nom: id for id, nom in departements}
 
