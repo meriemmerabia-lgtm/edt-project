@@ -19,17 +19,14 @@ st.markdown("""
 st.title(" Emploi du Temps des Examens Universitaires")
 
 # CONNEXION POSTGRESQL
-try:
-    conn = psycopg2.connect(
-        host="localhost",
-        database="gestion_examens",
-        user="postgres",
-        password="1234"
-    )
-    cur = conn.cursor()
-except Exception as e:
-    st.error(f" Connexion PostgreSQL impossible : {e}")
-    st.stop()
+conn = psycopg2.connect(
+    host="aws-1-eu-central-2.pooler.supabase.com",
+    port=6543,
+    database="postgres",
+    user="postgres.ryzlenworqjmdgkanfcj",
+    password="Etd2026!Secure"
+)
+cur = conn.cursor()
 
 # CHARGEMENT DES DONNÉES
 # Départements

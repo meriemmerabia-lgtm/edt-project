@@ -8,13 +8,14 @@ fake.unique.clear()  # Réinitialise la mémoire unique
 
 # Connexion PostgreSQL
 conn = psycopg2.connect(
-    host="localhost",
-    database="gestion_examens",
-    user="postgres",
-    password="1234"
+    host="aws-1-eu-central-2.pooler.supabase.com",
+    port=6543,
+    database="postgres",
+    user="postgres.ryzlenworqjmdgkanfcj",
+    password="Etd2026!Secure"
 )
 cursor = conn.cursor()
-# 1️⃣ Départements
+# 1️ Départements
 departements = ["Informatique", "Maths", "Physique", "Chimie", "Biologie", "Economie", "Droit"]
 for dept in departements:
     cursor.execute("""
