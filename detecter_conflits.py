@@ -4,12 +4,11 @@ import pandas as pd
 import time
 
 conn = psycopg2.connect(
-    host=st.secrets["postgres"]["host"],
-    database=st.secrets["postgres"]["database"],
-    user=st.secrets["postgres"]["user"],
-    password=st.secrets["postgres"]["password"],
-    port=st.secrets["postgres"]["port"],
-    sslmode="require"
+    host="db.ryzlenworqjmdgkanfcj.supabase.co",
+    database="postgres",
+    user="postgres",
+    password="Etd2026!Secure",
+    port=5432
 )
 cursor = conn.cursor()
 

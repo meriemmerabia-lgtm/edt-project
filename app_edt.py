@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import psycopg2
@@ -5,15 +6,18 @@ import psycopg2
 st.set_page_config(page_title="Gestion Examens", layout="wide")
 st.title("Emploi du Temps des Examens Universitaires")
 
-conn = psycopg2.connect(
-    host=st.secrets["postgres"]["host"],
-    database=st.secrets["postgres"]["database"],
-    user=st.secrets["postgres"]["user"],
-    password=st.secrets["postgres"]["password"],
-    port=st.secrets["postgres"]["port"],
-    sslmode="require"
-)
-cur = conn.cursor()
+# Connexion PostgreSQL Render
+
+# Récupère l'URL de la base depuis les variables d'environnement (Render)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    st.success("Connexion à la base Render réussie !")
+except Exception as e:
+    st.error(f"Erreur de connexion à la base Render : {e}")
+    st.stop()  # Arrête l'exécution si la connexion échoue
 
 # Chargement départements
 cur.execute("SELECT id, nom FROM departements ORDER BY nom")
@@ -30,12 +34,14 @@ formations_dept = [nom for nom, (fid, did) in formation_dict.items() if did == d
 selected_formation = st.selectbox("Formation", formations_dept)
 formation_id = formation_dict[selected_formation][0]
 
+
 # Chargement professeurs
 cur.execute("SELECT id, nom FROM professeurs")
 professeurs = cur.fetchall()
 prof_dict = {nom: id for id, nom in professeurs}
 selected_prof = st.selectbox("Professeur", ["Tous"] + list(prof_dict.keys()))
 prof_id = None if selected_prof == "Tous" else prof_dict[selected_prof]
+
 
 # Requête planning
 query = f"""
@@ -60,13 +66,15 @@ WHERE f.id = {formation_id}
 if prof_id:
     query += f" AND p.id = {prof_id}"
 query += " ORDER BY e.date_heure"
+
 df = pd.read_sql(query, conn)
 df['date_heure'] = pd.to_datetime(df['date_heure'])
+
 
 # Affichage
 st.dataframe(df, use_container_width=True)
 
-# Générer automatiquement
+# Génération automatique
 if st.button("Générer automatiquement le planning"):
     cur.execute("CALL generer_planning()")
     conn.commit()

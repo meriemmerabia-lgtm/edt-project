@@ -1,13 +1,12 @@
+import os
 import psycopg2
-import streamlit as st
 
-def get_connection():
-    cfg = st.secrets["postgres"]  # utiliser Streamlit secrets
-    return psycopg2.connect(
-        host=cfg["host"],
-        database=cfg["database"],
-        user=cfg["user"],
-        password=cfg["password"],
-        port=cfg["port"],
-        sslmode="require"
-    )
+# Récupère l'URL de la base depuis l'environnement (plus sûr pour Render)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+# Connexion à la base
+try:
+    conn = psycopg2.connect(DATABASE_URL)
+    print("Connexion à la base Render réussie !")
+except Exception as e:
+    print("Erreur de connexion à la base Render :", e)
