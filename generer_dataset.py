@@ -1,3 +1,4 @@
+import os
 from faker import Faker
 import psycopg2
 import random
@@ -12,7 +13,8 @@ conn = psycopg2.connect(
     port=6543,
     database="postgres",
     user="postgres.ryzlenworqjmdgkanfcj",
-    password="Etd2026!Secure"
+    password=os.environ.get("DB_PASSWORD")
+
 )
 cursor = conn.cursor()
 # 1️ Départements

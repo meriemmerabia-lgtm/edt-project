@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import psycopg2
@@ -24,7 +25,8 @@ conn = psycopg2.connect(
     port=6543,
     database="postgres",
     user="postgres.ryzlenworqjmdgkanfcj",
-    password="Etd2026!Secure"
+    password=os.environ.get("DB_PASSWORD")
+
 )
 cur = conn.cursor()
 

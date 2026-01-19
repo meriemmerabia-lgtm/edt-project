@@ -1,3 +1,4 @@
+import os
 import psycopg2
 import pandas as pd
 import time  # <-- Ajouté pour mesurer le temps
@@ -8,7 +9,8 @@ conn = psycopg2.connect(
     port=6543,
     database="postgres",
     user="postgres.ryzlenworqjmdgkanfcj",
-    password="Etd2026!Secure"
+    ppassword=os.environ.get("DB_PASSWORD")
+
 )
 cursor = conn.cursor()
 # Requêtes de détection de conflits
