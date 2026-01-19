@@ -8,14 +8,14 @@ from datetime import datetime, timedelta
 fake = Faker()
 fake.unique.clear()
 
-conn = psycopg2.connect(
-    host="db.ryzlenworqjmdgkanfcj.supabase.co",
-    database="postgres",
-    user="postgres",
-    password="Etd2026!Secure",
-    port=5432
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
-)
+if not DATABASE_URL:
+    st.error("DATABASE_URL non trouvé")
+    st.stop()
+
+conn = psycopg2.connect(DATABASE_URL)
+
 cursor = conn.cursor()
 
 # 1. Départements
